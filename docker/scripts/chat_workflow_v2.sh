@@ -19,8 +19,9 @@ done
 # Fetch template data from Harness API
 log "Fetching template data from Harness API..."
 TEMPLATE_RESPONSE=$(curl -s -X GET \
-    "https://localhost:8181/template/api/templates/$PLUGIN_TEMPLATE_IDENTIFIER?accountIdentifier=kmpySmUISimoRrJL6NL73w&&versionLabel=v1&deleted=false" \
-    -H "x-api-key: $PLUGIN_HARNESS_API_KEY")
+    "https://localhost:8080/template/api/templates/$PLUGIN_TEMPLATE_IDENTIFIER?accountIdentifier=kmpySmUISimoRrJL6NL73w&versionLabel=v1&deleted=false" \
+    -H "x-api-key: $PLUGIN_HARNESS_API_KEY" \
+    -H "content-type: application/json")
 
 # Check if response is successful
 if [ "$(echo "$TEMPLATE_RESPONSE" | jq -r '.status')" != "SUCCESS" ]; then
