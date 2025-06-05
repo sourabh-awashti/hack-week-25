@@ -19,7 +19,7 @@ done
 # Fetch template data from Harness API
 log "Fetching template data from Harness API..."
 TEMPLATE_RESPONSE=$(curl -s -X GET \
-    "https://app.harness.io/template/api/templates/$PLUGIN_TEMPLATE_IDENTIFIER?accountIdentifier=kmpySmUISimoRrJL6NL73w&&versionLabel=v1&deleted=false" \
+    "https://localhost:8181/template/api/templates/$PLUGIN_TEMPLATE_IDENTIFIER?accountIdentifier=kmpySmUISimoRrJL6NL73w&&versionLabel=v1&deleted=false" \
     -H "x-api-key: $PLUGIN_HARNESS_API_KEY")
 
 # Check if response is successful
@@ -43,8 +43,8 @@ get_yaml_value() {
 }
 
 # Extract values from YAML
-PLUGIN_MCP_CLIENT_ID=${PLUGIN_MCP_CLIENT_ID:-$(get_yaml_value '.template.spec.clientIdRef')}
-PLUGIN_MCP_CLIENT_REF=${PLUGIN_MCP_CLIENT_REF:-$(get_yaml_value '.template.spec.clientSecretRef')}
+PLUGIN_MCP_CLIENT_ID="KYEmLxK2eSQdQqN0REpquycY6QklwrOTvaFUmK4sJ8c"
+PLUGIN_MCP_CLIENT_REF="yw-bzm1YFIgKRnzkTt1Bhv1Oqrfpye_LyzcLlkVcEgA"
 PLUGIN_REGISTRY_AUTH_SERVER=${PLUGIN_REGISTRY_AUTH_SERVER:-$(get_yaml_value '.template.spec.registryAuthServer')}
 PLUGIN_APP_SLUG=${PLUGIN_APP_SLUG:-$(get_yaml_value '.template.spec.appSlug')}
 PLUGIN_SERVER_URL=${PLUGIN_SERVER_URL:-$(get_yaml_value '.template.spec.serverUrl')}
