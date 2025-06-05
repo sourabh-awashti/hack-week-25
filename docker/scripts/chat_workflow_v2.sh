@@ -17,11 +17,16 @@ for var in "${initial_vars[@]}"; do
 done
 
 # Fetch template data from Harness API
-log "Fetching template data from Harness API..."
-TEMPLATE_RESPONSE=$(curl -s -X GET \
-    "https://localhost:8080/template/api/templates/$PLUGIN_TEMPLATE_IDENTIFIER?accountIdentifier=kmpySmUISimoRrJL6NL73w&versionLabel=v1&deleted=false" \
-    -H "x-api-key: $PLUGIN_HARNESS_API_KEY" \
-    -H "content-type: application/json")
+# log "Fetching template data from Harness API..."
+# TEMPLATE_RESPONSE=$(curl -s -X GET \
+#     "https://localhost:8080/template/api/templates/$PLUGIN_TEMPLATE_IDENTIFIER?accountIdentifier=kmpySmUISimoRrJL6NL73w&versionLabel=v1&deleted=false" \
+#     -H "x-api-key: $PLUGIN_HARNESS_API_KEY" \
+#     -H "content-type: application/json")
+
+# Use hardcoded template response
+log "Fetching AI workflow template data..."
+TEMPLATE_RESPONSE='{"status":"SUCCESS","data":{"accountId":"kmpySmUISimoRrJL6NL73w","identifier":"n2","name":"n2","description":"","tags":{},"yaml":"template:\n  name: n2\n  identifier: n2\n  versionLabel: v1\n  type: AIWorkflow\n  tags: {}\n  spec:\n    body:\n      history: |-\n        {\n          \"sampleKey\": \"value\"\n        }\n      promptHistory: \"Fetch me the details of the latest hotfix for ng-manager. Get me the service, Environment and Tag for the latest hotfix done in json format. Output format {\\n  \\\"service\\\": \\\"value\\\",\\n  \\\"environment\\\": \\\"value\\\",\\n  \\\"tag\\\": \\\"value\\\"\\n}\"\n    model: gpt-4.1\n    serverUrl: https://mcp.pipedream.net/157bd7bd-f742-4050-bf48-8160231be586\n    registryAuthServer: https://api.pipedream.com/v1/oauth/token\n    clientIdRef: clientIdRef\n    clientSecretRef: clientSecretRef\n    appSlug: confluence\n  variables: []\n","versionLabel":"v1","templateEntityType":"AIWorkflow","templateScope":"account","version":0,"gitDetails":{"objectId":null,"branch":null,"repoIdentifier":null,"rootFolder":null,"filePath":null,"repoName":null,"commitId":null,"fileUrl":null,"repoUrl":null,"parentEntityConnectorRef":null,"parentEntityRepoName":null,"isHarnessCodeRepo":null},"entityValidityDetails":{"valid":true,"invalidYaml":null},"lastUpdatedAt":1749160085054,"storeType":"INLINE","yamlVersion":"0","isInlineHCEntity":false,"stableTemplate":true},"metaData":null,"correlationId":"b0731b02-c7a5-4ff8-85c1-61dae39c9656"}'
+
 
 # Check if response is successful
 if [ "$(echo "$TEMPLATE_RESPONSE" | jq -r '.status')" != "SUCCESS" ]; then
