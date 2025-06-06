@@ -42,19 +42,33 @@ YAML_DATA=$(echo "$TEMPLATE_RESPONSE" | jq -r '.data.yaml')
 # Parse required values from YAML
 log "Parsing values from YAML..."
 
-# Function to extract value from YAML using yq
+# Function to extract value from YAML using jq
 get_yaml_value() {
     local path=$1
-    echo "$YAML_DATA" | yq eval "$path" -
+    # Convert dot notation to jq path format and extract value
+    local jq_path=$(echo "$path" | sed 's/\./\\\\./')
+    echo "$YAML_DATA" | jq -r "fromjson? | .template.spec.$jq_path // empty"
 }
 
 # Extract values from YAML
 PLUGIN_MCP_CLIENT_ID="KYEmLxK2eSQdQqN0REpquycY6QklwrOTvaFUmK4sJ8c"
 PLUGIN_MCP_CLIENT_REF="yw-bzm1YFIgKRnzkTt1Bhv1Oqrfpye_LyzcLlkVcEgA"
-PLUGIN_REGISTRY_AUTH_SERVER=${PLUGIN_REGISTRY_AUTH_SERVER:-$(get_yaml_value '.template.spec.registryAuthServer')}
-PLUGIN_APP_SLUG=${PLUGIN_APP_SLUG:-$(get_yaml_value '.template.spec.appSlug')}
-PLUGIN_SERVER_URL=${PLUGIN_SERVER_URL:-$(get_yaml_value '.template.spec.serverUrl')}
-PLUGIN_PROMPT=${PLUGIN_PROMPT:-$(get_yaml_value '.template.spec.body.promptHistory')}
+
+log "Extracting values from YAML..."
+PLUGIN_REGISTRY_AUTH_SERVER=${PLUGIN_REGISTRY_AUTH_SERVER:-$(get_yaml_value 'registryAuthServer')}
+log "PLUGIN_REGISTRY_AUTH_SERVER: $PLUGIN_REGISTRY_AUTH_SERVER"
+
+PLUGIN_APP_SLUG=${PLUGIN_APP_SLUG:-$(get_yaml_value 'appSlug')}
+log "PLUGIN_APP_SLUG: $PLUGIN_APP_SLUG"
+
+PLUGIN_SERVER_URL=${PLUGIN_SERVER_URL:-$(get_yaml_value 'serverUrl')}
+log "PLUGIN_SERVER_URL: $PLUGIN_SERVER_URL"
+
+PLUGIN_PROMPT=${PLUGIN_PROMPT:-$(get_yaml_value 'body.promptHistory')}
+log "PLUGIN_PROMPT: $PLUGIN_PROMPT"
+
+log "Raw YAML_DATA for debugging:"
+echo "$YAML_DATA" | jq '.'
 
 # Check if required variables are now set
 log "Checking required variables..."
