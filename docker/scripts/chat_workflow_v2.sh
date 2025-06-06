@@ -56,6 +56,7 @@ get_yaml_value() {
         'appSlug') echo "$json_data" | jq -r 'match(".*appSlug: ([^\n]*).*"; "m").captures[0].string' ;;
         'serverUrl') echo "$json_data" | jq -r 'match(".*serverUrl: ([^\n]*).*"; "m").captures[0].string' ;;
         'body.promptHistory') echo "$json_data" | jq -r 'match(".*promptHistory: \"([^\"]*).*"; "m").captures[0].string' ;;
+        'previousResponseId') echo "$json_data" | jq -r 'match(".*previousResponseId: ([^\n]*).*"; "m").captures[0].string' ;;
     esac
 }
 
@@ -75,6 +76,9 @@ log "PLUGIN_SERVER_URL: $PLUGIN_SERVER_URL"
 
 PLUGIN_PROMPT=${PLUGIN_PROMPT:-$(get_yaml_value 'body.promptHistory')}
 log "PLUGIN_PROMPT: $PLUGIN_PROMPT"
+
+PLUGIN_PREVIOUS_RESPONSE_ID=${PLUGIN_PREVIOUS_RESPONSE_ID:-$(get_yaml_value 'previousResponseId')}
+log "PLUGIN_PREVIOUS_RESPONSE_ID: $PLUGIN_PREVIOUS_RESPONSE_ID"
 
 log "Raw YAML_DATA for debugging:"
 echo "$YAML_DATA" | jq '.'
@@ -185,8 +189,20 @@ echo "$JSON_CONTENT" | jq '.' || {
     exit 1
 }
 
-# Send webhook with parsed JSON
+# Validate that it's valid JSON
+if ! echo "$JSON_CONTENT" | jq '.' > /dev/null; then
+    log "Error: Invalid JSON content"
+    log "Content: $JSON_CONTENT"
+    exit 1
+fi
+
+log "JSON validation successful"
+
+# Send webhook with JSON directly
 log "Sending webhook..."
+log "Webhook payload:"
+echo "$JSON_CONTENT" | jq '.'
+
 WEBHOOK_RESPONSE=$(curl -s -X POST \
     -H 'content-type: application/json' \
     --url 'https://namangoenka.pr2.harness.io/gateway/pipeline/api/webhook/custom/x9rbsrIsQA6VcO6XF0no2Q/v3?accountIdentifier=JjwsoDSvRD6cC_7L51ruJA&orgIdentifier=default&projectIdentifier=WDPR_Adaptive_Payment_Platform_Card_Not_Present_Service_Guest_facing&pipelineIdentifier=cdpipeline&triggerIdentifier=webhook' \
