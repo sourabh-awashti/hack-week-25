@@ -1,6 +1,15 @@
 FROM redhat/ubi8-minimal:8.7-1107
-RUN microdnf update && microdnf install ca-certificates git tar openssh curl perl python38 shadow-utils diffutils jq
 
+# Install base packages and wget for downloading yq
+RUN microdnf update && \
+    microdnf install ca-certificates git tar openssh curl perl python38 shadow-utils diffutils jq wget && \
+    microdnf clean all
+
+# Install yq
+RUN wget https://github.com/mikefarah/yq/releases/download/v4.40.5/yq_linux_amd64 -O /usr/local/bin/yq && \
+    chmod +x /usr/local/bin/yq
+
+# Add and set permissions for the script
 ADD docker/scripts/* /usr/local/bin/
 RUN chmod +x /usr/local/bin/chat_workflow_v2.sh
 
