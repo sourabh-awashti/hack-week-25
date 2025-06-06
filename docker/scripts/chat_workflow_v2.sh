@@ -170,33 +170,12 @@ CHAT_RESPONSE=$(curl -s -X POST "https://api.openai.com/v1/responses" \
 log "Chat response received:"
 echo "$CHAT_RESPONSE" | jq '.'
 
-# Extract and process JSON from response
+# Extract JSON from response
 log "Processing response"
-LAST_OUTPUT=$(echo "$CHAT_RESPONSE" | jq -r '.output[] | select(.type == "message" and .role == "assistant") | .content[] | select(.type == "output_text") | .text')
-log "Assistant message: $LAST_OUTPUT"
-
-# Extract JSON content
-JSON_CONTENT=$(echo "$LAST_OUTPUT" | awk '/```json/{p=1;next}/```/{p=0;next}p')
-if [ -z "$JSON_CONTENT" ]; then
-    log "No JSON block found in message"
-    exit 1
-fi
+JSON_CONTENT=$(echo "$CHAT_RESPONSE" | jq -r '.output[] | select(.type == "message" and .role == "assistant") | .content[] | select(.type == "output_text") | .text')
 
 log "Extracted JSON:"
-echo "$JSON_CONTENT" | jq '.' || {
-    log "Failed to parse JSON. Raw content:"
-    echo "$JSON_CONTENT"
-    exit 1
-}
-
-# Validate that it's valid JSON
-if ! echo "$JSON_CONTENT" | jq '.' > /dev/null; then
-    log "Error: Invalid JSON content"
-    log "Content: $JSON_CONTENT"
-    exit 1
-fi
-
-log "JSON validation successful"
+echo "$JSON_CONTENT" | jq '.' || echo "$JSON_CONTENT"
 
 # Send webhook with JSON directly
 log "Sending webhook..."
