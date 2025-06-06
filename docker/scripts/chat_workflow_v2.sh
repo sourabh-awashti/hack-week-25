@@ -17,23 +17,23 @@ for var in "${initial_vars[@]}"; do
 done
 
 # Fetch template data from Harness API
-# log "Fetching template data from Harness API..."
-# TEMPLATE_RESPONSE=$(curl -s -X GET \
-#     "https://localhost:8080/template/api/templates/$PLUGIN_TEMPLATE_IDENTIFIER?accountIdentifier=kmpySmUISimoRrJL6NL73w&versionLabel=v1&deleted=false" \
-#     -H "x-api-key: $PLUGIN_HARNESS_API_KEY" \
-#     -H "content-type: application/json")
+log "Fetching template data from Harness API..."
+TEMPLATE_RESPONSE=$(curl --location "https://namangoenka.pr2.harness.io/gateway/template/api/templates/$PLUGIN_TEMPLATE_IDENTIFIER?accountIdentifier=JjwsoDSvRD6cC_7L51ruJA&versionLabel=v1" \
+  --header 'content-type: application/json' \
+  --header "x-api-key: $PLUGIN_HARNESS_API_KEY")
 
-# Use hardcoded template response
-log "Fetching AI workflow template data..."
-TEMPLATE_RESPONSE='{"status":"SUCCESS","data":{"accountId":"kmpySmUISimoRrJL6NL73w","identifier":"n2","name":"n2","description":"","tags":{},"yaml":"template:\n  name: n2\n  identifier: n2\n  versionLabel: v1\n  type: AIWorkflow\n  tags: {}\n  spec:\n    body:\n      history: |-\n        {\n          \"sampleKey\": \"value\"\n        }\n      promptHistory: \"Fetch me the details of the latest hotfix for ng-manager. Get me the service, Environment and Tag for the latest hotfix done in json format. Output format {\\n  \\\"service\\\": \\\"value\\\",\\n  \\\"environment\\\": \\\"value\\\",\\n  \\\"tag\\\": \\\"value\\\"\\n}\"\n    model: gpt-4.1\n    serverUrl: https://mcp.pipedream.net/157bd7bd-f742-4050-bf48-8160231be586\n    registryAuthServer: https://api.pipedream.com/v1/oauth/token\n    clientIdRef: clientIdRef\n    clientSecretRef: clientSecretRef\n    appSlug: confluence\n  variables: []\n","versionLabel":"v1","templateEntityType":"AIWorkflow","templateScope":"account","version":0,"gitDetails":{"objectId":null,"branch":null,"repoIdentifier":null,"rootFolder":null,"filePath":null,"repoName":null,"commitId":null,"fileUrl":null,"repoUrl":null,"parentEntityConnectorRef":null,"parentEntityRepoName":null,"isHarnessCodeRepo":null},"entityValidityDetails":{"valid":true,"invalidYaml":null},"lastUpdatedAt":1749160085054,"storeType":"INLINE","yamlVersion":"0","isInlineHCEntity":false,"stableTemplate":true},"metaData":null,"correlationId":"b0731b02-c7a5-4ff8-85c1-61dae39c9656"}'
-
+# Parse and validate the template response
+log "Validating template response..."
 
 # Check if response is successful
 if [ "$(echo "$TEMPLATE_RESPONSE" | jq -r '.status')" != "SUCCESS" ]; then
-    log "Error: Failed to fetch template data"
+    log "Error: Failed to fetch template data. Status is not SUCCESS"
     log "Response: $TEMPLATE_RESPONSE"
     exit 1
 fi
+
+
+log "Template validation successful"
 
 # Extract and parse YAML from response
 log "Extracting YAML from response..."
@@ -55,11 +55,10 @@ PLUGIN_REGISTRY_AUTH_SERVER=${PLUGIN_REGISTRY_AUTH_SERVER:-$(get_yaml_value '.te
 PLUGIN_APP_SLUG=${PLUGIN_APP_SLUG:-$(get_yaml_value '.template.spec.appSlug')}
 PLUGIN_SERVER_URL=${PLUGIN_SERVER_URL:-$(get_yaml_value '.template.spec.serverUrl')}
 PLUGIN_PROMPT=${PLUGIN_PROMPT:-$(get_yaml_value '.template.spec.body.promptHistory')}
-PLUGIN_PREVIOUS_RESPONSE_ID=${PLUGIN_PREVIOUS_RESPONSE_ID:-$(get_yaml_value '.template.spec.body.previousResponseId')}
 
 # Check if required variables are now set
 log "Checking required variables..."
-required_vars=("PLUGIN_MCP_CLIENT_ID" "PLUGIN_MCP_CLIENT_REF" "PLUGIN_REGISTRY_AUTH_SERVER" "PLUGIN_OPENAI_API_KEY" "PLUGIN_APP_SLUG" "PLUGIN_SERVER_URL" "PLUGIN_PROMPT")
+required_vars=("PLUGIN_REGISTRY_AUTH_SERVER" "PLUGIN_APP_SLUG" "PLUGIN_SERVER_URL" "PLUGIN_PROMPT")
 for var in "${required_vars[@]}"; do
     if [ -z "${!var}" ]; then
         log "Error: $var is not set after parsing template"
@@ -167,7 +166,7 @@ echo "$JSON_CONTENT" | jq '.' || {
 log "Sending webhook..."
 WEBHOOK_RESPONSE=$(curl -s -X POST \
     -H 'content-type: application/json' \
-    --url 'https://app.harness.io/gateway/pipeline/api/webhook/custom/v2?accountIdentifier=vRvDt5iuS7uwyGSo8S0biA&orgIdentifier=default&projectIdentifier=SourabhProject&pipelineIdentifier=shell_script_pipeline&triggerIdentifier=t1' \
+    --url 'https://namangoenka.pr2.harness.io/gateway/pipeline/api/webhook/custom/x9rbsrIsQA6VcO6XF0no2Q/v3?accountIdentifier=JjwsoDSvRD6cC_7L51ruJA&orgIdentifier=default&projectIdentifier=WDPR_Adaptive_Payment_Platform_Card_Not_Present_Service_Guest_facing&pipelineIdentifier=cdpipeline&triggerIdentifier=webhook' \
     -d "$JSON_CONTENT")
 
 log "Webhook response:"
