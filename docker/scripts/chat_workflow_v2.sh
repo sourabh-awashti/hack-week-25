@@ -18,9 +18,12 @@ done
 
 # Fetch template data from Harness API
 log "Fetching template data from Harness API..."
-TEMPLATE_RESPONSE=$(curl --location "https://namangoenka.pr2.harness.io/gateway/template/api/templates/$PLUGIN_TEMPLATE_IDENTIFIER?accountIdentifier=JjwsoDSvRD6cC_7L51ruJA&versionLabel=v1" \
+TEMPLATE_RESPONSE=$(curl -s --location "https://namangoenka.pr2.harness.io/gateway/template/api/templates/$PLUGIN_TEMPLATE_IDENTIFIER?accountIdentifier=JjwsoDSvRD6cC_7L51ruJA&versionLabel=v1" \
   --header 'content-type: application/json' \
   --header "x-api-key: $PLUGIN_HARNESS_API_KEY")
+
+log "Template Response:"
+echo "$TEMPLATE_RESPONSE" | jq '.'
 
 # Parse and validate the template response
 log "Validating template response..."
@@ -42,12 +45,18 @@ YAML_DATA=$(echo "$TEMPLATE_RESPONSE" | jq -r '.data.yaml')
 # Parse required values from YAML
 log "Parsing values from YAML..."
 
-# Function to extract value from YAML using jq
+# Function to extract value from YAML
 get_yaml_value() {
     local path=$1
-    # Convert dot notation to jq path format and extract value
-    local jq_path=$(echo "$path" | sed 's/\./\\\\./')
-    echo "$YAML_DATA" | jq -r "fromjson? | .template.spec.$jq_path // empty"
+    # Parse the YAML string into a JSON structure first
+    local json_data=$(echo "$YAML_DATA" | jq -R -s '.')
+    # Now extract the value using the path
+    case "$path" in
+        'registryAuthServer') echo "$json_data" | jq -r 'match(".*registryAuthServer: ([^\n]*).*"; "m").captures[0].string' ;;
+        'appSlug') echo "$json_data" | jq -r 'match(".*appSlug: ([^\n]*).*"; "m").captures[0].string' ;;
+        'serverUrl') echo "$json_data" | jq -r 'match(".*serverUrl: ([^\n]*).*"; "m").captures[0].string' ;;
+        'body.promptHistory') echo "$json_data" | jq -r 'match(".*promptHistory: \"([^\"]*).*"; "m").captures[0].string' ;;
+    esac
 }
 
 # Extract values from YAML
