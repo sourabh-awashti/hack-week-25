@@ -1,23 +1,27 @@
 FROM redhat/ubi8-minimal:8.7-1107
 
-# Install required packages
-RUN microdnf update && \
-    microdnf install -y ca-certificates git tar openssh curl perl python38 shadow-utils diffutils jq && \
+RUN microdnf update -y && \
+    microdnf install -y \
+      ca-certificates \
+      git \
+      tar \
+      openssh \
+      curl \
+      perl \
+      python38 \
+      shadow-utils \
+      diffutils \
+      jq && \
+    # Download yq
+    curl -L https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -o /usr/local/bin/yq && \
+    chmod +x /usr/local/bin/yq && \
     microdnf clean all
 
-# Install yq (latest v4.x)
-RUN curl -L https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 \
-    -o /usr/local/bin/yq && \
-    chmod +x /usr/local/bin/yq && \
-    ln -s /usr/local/bin/yq /usr/bin/yq
-
-
-# Copy script
+# Copy your script files
 ADD docker/scripts/* /usr/local/bin/
 RUN chmod +x /usr/local/bin/chat_workflow_v2.sh
 
-# Verify yq is in PATH
-RUN echo "Verifying yq location..." && which yq && yq --version
+# Verify yq is in PATH using 'command -v'
+RUN echo "Verifying yq location..." && command -v yq && yq --version
 
-# Entrypoint
 ENTRYPOINT ["/usr/local/bin/chat_workflow_v2.sh"]
