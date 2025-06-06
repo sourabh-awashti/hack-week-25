@@ -5,9 +5,12 @@ RUN microdnf update && \
     microdnf install -y ca-certificates git tar openssh curl perl python38 shadow-utils diffutils jq && \
     microdnf clean all
 
-# Install yq
-RUN curl -L https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -o /usr/local/bin/yq && \
-    chmod +x /usr/local/bin/yq
+# Install yq (latest v4.x)
+RUN curl -L https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 \
+    -o /usr/local/bin/yq && \
+    chmod +x /usr/local/bin/yq && \
+    ln -s /usr/local/bin/yq /usr/bin/yq
+
 
 # Copy script
 ADD docker/scripts/* /usr/local/bin/
